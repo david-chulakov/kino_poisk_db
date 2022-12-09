@@ -14,14 +14,14 @@ delimiter /
 DROP PROCEDURE IF EXISTS actors_in_film/
 CREATE PROCEDURE actors_in_film(film_name VARCHAR(200))
 BEGIN
-	SELECT tbl2.name as film_name, tbl3.type_name as `type`, tbl4.category_name as category, 
+	SELECT tbl2.film_name as film_name, tbl3.type_name as `type`, tbl4.category_name as category,
 		tbl5.first_name as actor_fn, tbl5.last_name as actor_ln
 	FROM actors_films tbl1
-	JOIN films tbl2 ON tbl1.film_id = tbl2.id
-	JOIN film_types tbl3 ON tbl2.type_id = tbl3.id 
-	JOIN categories tbl4 ON tbl2.category_id = tbl4.id 
-	JOIN actors tbl5 ON tbl1.actor_id = tbl5.id 
-	WHERE tbl2.name = film_name;
+	JOIN films tbl2 ON tbl1.film_id = tbl2.film_id
+	JOIN film_types tbl3 ON tbl2.type_id = tbl3.type_id
+	JOIN categories tbl4 ON tbl2.category_id = tbl4.category_id
+	JOIN actors tbl5 ON tbl1.actor_id = tbl5.actor_id
+	WHERE tbl2.film_name = film_name;
 END;
 /
 delimiter ;
@@ -37,10 +37,10 @@ BEGIN
 	
 	DECLARE `result` INT;
 	SET `result` = (SELECT COUNT(*)
-	FROM users tbl1
-	JOIN films_viewed tbl2 ON tbl1.id = tbl2.user_id
-	JOIN films tbl3 ON tbl2.film_id = tbl3.id 
-	WHERE tbl1.id = user_id);
+        FROM users tbl1
+        JOIN films_viewed tbl2 ON tbl1.user_id = tbl2.user_id
+        JOIN films tbl3 ON tbl2.film_id = tbl3.film_id
+        WHERE tbl1.user_id = user_id);
 
 	RETURN `result`;
 END;
@@ -48,17 +48,17 @@ END;
 
 delimiter ;
 
-SELECT films_watched_by_user_id(1);
+SELECT films_watched_by_user_id(1) as "Количество фильмов";
 
 
 
 # Отзывы фильма
 CREATE OR REPLACE VIEW reviews
 AS
-	SELECT tbl2.name as film_name, tbl3.first_name as user_name, tbl1.review 
+	SELECT tbl2.film_name as film_name, tbl3.first_name as user_name, tbl1.review_text
 	FROM film_reviews tbl1
-	JOIN films tbl2 ON tbl1.film_id = tbl2.id 
-	JOIN users tbl3 ON tbl1.user_id = tbl3.id;
+	JOIN films tbl2 ON tbl1.film_id = tbl2.film_id
+	JOIN users tbl3 ON tbl1.user_id = tbl3.user_id;
 
 SELECT * FROM reviews r ;
 
@@ -68,15 +68,15 @@ delimiter /
 DROP PROCEDURE IF EXISTS film_files/
 CREATE PROCEDURE film_files(film_name VARCHAR(200))
 BEGIN
-	SELECT tbl2.name as film_name, tbl3.type_name, tbl1.filename
+	SELECT tbl2.film_name as film_name, tbl3.type_name, tbl1.filename
 	FROM media tbl1
-	JOIN films tbl2 ON tbl1.film_id = tbl2.id 
-	JOIN media_types tbl3 ON tbl1.media_type_id = tbl3.id 
-	WHERE tbl2.name = film_name;
+	JOIN films tbl2 ON tbl1.film_id = tbl2.film_id
+	JOIN media_types tbl3 ON tbl1.media_type_id = tbl3.media_type_id
+	WHERE tbl2.film_name = film_name;
 END;
 /
 delimiter ;
-CALL film_files('Начало')
+CALL film_files('Начало');
 
 
 # какие фильмы посмотерл пользователь
@@ -85,11 +85,11 @@ DROP PROCEDURE IF EXISTS what_films_by_user_id/
 CREATE PROCEDURE what_films_by_user_id(
 	user_id BIGINT UNSIGNED)
 BEGIN
-	SELECT tbl1.first_name as user_name, tbl3.name as film_name
+	SELECT tbl1.first_name as user_name, tbl3.film_name as film_name
 	FROM users tbl1
-	JOIN films_viewed tbl2 ON tbl1.id = tbl2.user_id
-	JOIN films tbl3 ON tbl2.film_id = tbl3.id 
-	WHERE tbl1.id = user_id;
+	JOIN films_viewed tbl2 ON tbl1.user_id = tbl2.user_id
+	JOIN films tbl3 ON tbl2.film_id = tbl3.film_id
+	WHERE tbl1.user_id = user_id AND tbl3.type_id = 1;
 END;
 /
 delimiter ;

@@ -1,2 +1,2 @@
 # kino_poisk_db
-kino_poisk small database 
+Пример проектирования базы данных для стримингового сервиса
